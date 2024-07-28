@@ -2,10 +2,10 @@ package controllers
 
 import (
 	"net/http"
-	httpserver "tech-challenge-fase-1/internal/infra/http"
+	"tech-challenge-fase-1/internal/core/dtos"
 	"tech-challenge-fase-1/internal/core/repositories"
 	"tech-challenge-fase-1/internal/core/use_cases/customers"
-	"tech-challenge-fase-1/internal/core/dtos"
+	httpserver "tech-challenge-fase-1/internal/infra/http"
 )
 
 type CustomerController struct {
@@ -19,18 +19,19 @@ func NewCustomerController(customerRepository repositories.CustomerRepositoryInt
 }
 
 // GetCustomer godoc
-// @Summary      Show a customer
-// @Description  get the customer by CPF
-// @Tags         customers
-// @Accept       json
-// @Produce      json
-// @Param        cpf   path      string  true  "Customer CPF"
-// @Success      200  {object}  dtos.CustomerDTO
-// @Failure      404 {string} string "when object not found"
-// @Router       /customer/{cpf}/ [get]
+//
+//	@Summary		Show a customer
+//	@Description	get the customer by CPF
+//	@Tags			customers
+//	@Accept			json
+//	@Produce		json
+//	@Param			cpf	path		string	true	"Customer CPF"
+//	@Success		200	{object}	dtos.CustomerDTO
+//	@Failure		404	{string}	string	"when object not found"
+//	@Router			/customer/{cpf}/ [get]
 func (cc *CustomerController) GetCustomer(c httpserver.HTTPContext) {
 	cpf := c.Param("cpf")
-	getCustomer := customers.NewGetCustomer(cc.customerRepository)
+	getCustomer := customers.NewGetCustomerUseCase(cc.customerRepository)
 	customer, err := getCustomer.Execute(cpf)
 	if err != nil {
 		sendError(c, http.StatusNotFound, "Customer not found")
@@ -40,16 +41,17 @@ func (cc *CustomerController) GetCustomer(c httpserver.HTTPContext) {
 }
 
 // RegisterCustomer godoc
-// @Summary      Create a customer
-// @Description  register the customer information
-// @Tags         customers
-// @Accept       json
-// @Produce      json
-// @Param        customer   body      dtos.CreateCustomerDTO  true  "Insert Customer"
-// @Success      200  {object}  dtos.CustomerDTO
-// @Failure      400 {string} string "when invalid params"
-// @Failure      406 {string} string "when invalid status"
-// @Router       /customer/ [post]
+//
+//	@Summary		Create a customer
+//	@Description	register the customer information
+//	@Tags			customers
+//	@Accept			json
+//	@Produce		json
+//	@Param			customer	body		dtos.CreateCustomerDTO	true	"Insert Customer"
+//	@Success		200			{object}	dtos.CustomerDTO
+//	@Failure		400			{string}	string "when bad request"
+//	@Failure		406			{string}	string "when invalid params or invalid object"
+//	@Router			/customer/ [post]
 func (cc *CustomerController) RegisterCustomer(c httpserver.HTTPContext) {
 	request := RegiterCustomerRequest{}
 	c.BindJSON(&request)
@@ -58,7 +60,7 @@ func (cc *CustomerController) RegisterCustomer(c httpserver.HTTPContext) {
 		return
 	}
 
-	insertCustomer := customers.NewInsertCustomer(cc.customerRepository)
+	insertCustomer := customers.NewInsertCustomerUseCase(cc.customerRepository)
 	dto := &dtos.CreateCustomerDTO{
 		Name:  request.Name,
 		Email: request.Email,

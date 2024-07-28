@@ -6,7 +6,8 @@ type OrderDTO struct {
 	Id     string         `json:"order_id,omitempty"`
 	CustomerId *string `json:"customer_id,omitempty"`
 	Items  []*OrderItemDTO `json:"items,omitempty"`
-	Status string         `json:"status,omitempty"`
+	PaymentStatus string         `json:"payment_status,omitempty"`
+	PreparationStatus string         `json:"preparation_status,omitempty"`
 	Total  float64        `json:"total,omitempty"`
 }
 
@@ -20,7 +21,7 @@ func NewOrderDTOFromEntity(order *entities.Order) *OrderDTO {
 	orderItems := []*OrderItemDTO{}
 	for _, item := range order.GetItems() {
 		orderItems = append(orderItems, &OrderItemDTO{
-			Amount:      float64(item.GetAmount()) / 100,
+			Amount:      item.GetAmount(),
 			Quantity:    item.GetQuantity(),
 			ProductName: item.GetProductName(),
 		})
@@ -29,7 +30,8 @@ func NewOrderDTOFromEntity(order *entities.Order) *OrderDTO {
 		Id:     order.GetId(),
 		CustomerId: order.GetCustomerId(),
 		Items:  orderItems,
-		Status: order.GetStatus().String(),
-		Total:  float64(order.GetTotal()) / 100,
+		PaymentStatus: order.GetPaymentStatus().String(),
+		PreparationStatus: order.GetPreparationStatus().String(),
+		Total:  order.GetTotal(),
 	}
 }
